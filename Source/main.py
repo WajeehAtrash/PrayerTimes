@@ -1,32 +1,36 @@
 import tkinter as tk
-import  BackEnd.API_calls as call
-from tkinter import ttk,messagebox
+import BackEnd.API_calls as Call
+from tkinter import ttk, messagebox
 
 methods = ["Shia Ithna-Ansari", "University of Islamic Sciences, Karachi", "Islamic Society of North America",
-          "Muslim World League", "Umm Al-Qura University, Makkah", "Egyptian General Authority of Survey",
-          "Institute of Geophysics, University of Tehran", "Gulf Region", "Kuwait", "Qatar",
-          "Majlis Ugama Islam Singapura, Singapore","Union Organization islamic de France", "Diyanet İşleri Başkanlığı, Turkey",
-          "Spiritual Administration of Muslims of Russia","Moonsighting Committee Worldwide", "Dubai"]
+           "Muslim World League", "Umm Al-Qura University, Makkah", "Egyptian General Authority of Survey",
+           "Institute of Geophysics, University of Tehran", "Gulf Region", "Kuwait", "Qatar",
+           "Majlis Ugama Islam Singapura, Singapore", "Union Organization islamic de France",
+           "Diyanet İşleri Başkanlığı, Turkey", "Spiritual Administration of Muslims of Russia",
+           "Moonsighting Committee Worldwide", "Dubai"]
 
 prayer_times_labels = []
 times_row = 4
 default_city = "Cairo"
 default_country = "Egypt"
+
+
 def fetch_times_gui():
     city = city_entry.get()
     country = country_entry.get()
     method = method_combo.current()
     index = 0
     if city and country:
-        times = call.fetch_prayer_times(city, country, method)
+        times = Call.fetch_prayer_times(city, country, method)
         del prayer_times_labels[:]
         for name, time in times.items():
-            if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" and name != "Lastthird":
+            if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
+                    and name != "Lastthird":
                 prayer_times_labels.append(ttk.Label(frame, text=f"{name} : {time}"))
-                prayer_times_labels[index].grid(row=times_row + index, column= 0, columnspan=2)
+                prayer_times_labels[index].grid(row=times_row + index, column=0, columnspan=2)
                 index = index + 1
     else:
-        messagebox.showerror("Error","unable to fetch paryer times, please check your input")
+        messagebox.showerror("Error", "unable to fetch paryer times, please check your input")
 
 
 if __name__ == '__main__':

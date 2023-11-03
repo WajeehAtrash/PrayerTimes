@@ -1,5 +1,6 @@
 import requests
 
+
 def fetch_prayer_times(city, country, method=2):
     url = f" http://api.aladhan.com/v1/timingsByCity?city={city}&country={country}&method={method}"
 
