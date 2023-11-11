@@ -101,7 +101,7 @@ class App(tk.Tk):
             index = 0
             del self.__private_prayer_times_labels[:]
             times = thread.get_times()
-            if times != -1:
+            if times is not None:
                 for name, time in times.items():
                     if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
                             and name != "Lastthird":
