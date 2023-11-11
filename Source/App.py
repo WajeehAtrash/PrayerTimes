@@ -1,6 +1,7 @@
 import tkinter as tk
 import BackEnd.API_calls as Call
 from tkinter import ttk, messagebox
+from threading import Lock
 
 
 class App(tk.Tk):
@@ -20,6 +21,7 @@ class App(tk.Tk):
                                   "Moonsighting Committee Worldwide", "Dubai"]
         self.__private_times_row = 4
         self.__create_body_frame()
+        self.__request_lock = Lock()
 
     def __create_body_frame(self):
         self.body = ttk.Frame(self)
@@ -79,15 +81,16 @@ class App(tk.Tk):
             messagebox.showerror("Error", "Please enter a country and city names")
 
     def __fetch_times(self):
-        city = self.city_entry.get()
-        country = self.country_entry.get()
-        method = self.method_combo.current()
-        if city and country:
-            api_call = Call.PrayerTimesAPI(city, country, method)
-            api_call.start()
-            self.monitor(api_call)
-        else:
-            messagebox.showerror("Error", "Please enter a country and city names")
+        with self.__request_lock:
+            city = self.city_entry.get()
+            country = self.country_entry.get()
+            method = self.method_combo.current()
+            if city and country:
+                api_call = Call.PrayerTimesAPI(city, country, method)
+                api_call.start()
+                self.monitor(api_call)
+            else:
+                messagebox.showerror("Error", "Please enter a country and city names")
 
     def monitor(self, thread):
 
