@@ -53,16 +53,16 @@ class App(tk.Tk):
 
         # attach the body frame
         self.body.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=10)
-        self.__fetch_times()
+        self.__fetch_times_start()
 
-    def __fetch_times(self):
+    def __fetch_times_start(self):
         city = self.city_entry.get()
         country = self.country_entry.get()
         method = self.method_combo.current()
         index = 0
         if city and country:
             api_call = Call.PrayerTimesAPI(city, country, method)
-            times = api_call.run()
+            times = api_call.fetch()
             del self.__private_prayer_times_labels[:]
             if times != -1:
                 for name, time in times.items():
@@ -77,6 +77,40 @@ class App(tk.Tk):
                 messagebox.showerror("Error", "unable to fetch prayer times, please check your input")
         else:
             messagebox.showerror("Error", "Please enter a country and city names")
+
+    def __fetch_times(self):
+        city = self.city_entry.get()
+        country = self.country_entry.get()
+        method = self.method_combo.current()
+        if city and country:
+            api_call = Call.PrayerTimesAPI(city, country, method)
+            api_call.start()
+            self.monitor(api_call)
+        else:
+            messagebox.showerror("Error", "Please enter a country and city names")
+
+    def monitor(self, thread):
+
+        if thread.is_alive():
+            # check the thread every 100ms
+            self.after(100, lambda: self.monitor(thread))
+        else:
+            index = 0
+            del self.__private_prayer_times_labels[:]
+            times = thread.get_times()
+            if times != -1:
+                for name, time in times.items():
+                    if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
+                            and name != "Lastthird":
+                        self.__private_prayer_times_labels.append(ttk.Label(self.body, text=f"{name} : {time}"))
+                        self.__private_prayer_times_labels[index].grid(row=self.__private_times_row + index, column=0,
+                                                                       columnspan=2)
+                        index = index + 1
+                self.fetch_button['state'] = tk.NORMAL
+                messagebox.showinfo("Success", "Times fetched successfully")
+            else:
+                messagebox.showerror("Error", "unable to fetch prayer times, please check your input")
+            self.fetch_button['state'] = tk.NORMAL
 
 
 if __name__ == "__main__":
