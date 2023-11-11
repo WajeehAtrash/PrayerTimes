@@ -19,9 +19,9 @@ class App(tk.Tk):
                                   "Diyanet İşleri Başkanlığı, Tukey", "Spiritual Administration of Muslims of Russia",
                                   "Moonsighting Committee Worldwide", "Dubai"]
         self.__private_times_row = 4
-        self.create_body_frame()
+        self.__create_body_frame()
 
-    def create_body_frame(self):
+    def __create_body_frame(self):
         self.body = ttk.Frame(self)
 
         #-----city input -----
@@ -48,31 +48,35 @@ class App(tk.Tk):
 
         # -----fetching button -----
         self.fetch_button = ttk.Button(self.body, text="Get Prayer Times")
-        self.fetch_button['command'] = self.fetch_times()
+        self.fetch_button['command'] = self.__fetch_times
         self.fetch_button.grid(row=3, column=0, columnspan=2)
 
         # attach the body frame
         self.body.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=10)
+        self.__fetch_times()
 
-
-    def fetch_times(self):
+    def __fetch_times(self):
         city = self.city_entry.get()
         country = self.country_entry.get()
         method = self.method_combo.current()
         index = 0
         if city and country:
-            API_call = Call.PrayerTimesAPI(city, country, method)
-            times = API_call.run()
+            api_call = Call.PrayerTimesAPI(city, country, method)
+            times = api_call.run()
             del self.__private_prayer_times_labels[:]
-            for name, time in times.items():
-                 if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
-                         and name != "Lastthird":
-                     self.__private_prayer_times_labels.append(ttk.Label(self.body, text=f"{name} : {time}"))
-                     self.__private_prayer_times_labels[index].grid(row=self.__private_times_row + index, column=0, columnspan=2)
-                     index = index + 1
-            self.fetch_button['state'] = tk.NORMAL
+            if times != -1:
+                for name, time in times.items():
+                    if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
+                            and name != "Lastthird":
+                        self.__private_prayer_times_labels.append(ttk.Label(self.body, text=f"{name} : {time}"))
+                        self.__private_prayer_times_labels[index].grid(row=self.__private_times_row + index, column=0,
+                                                                       columnspan=2)
+                        index = index + 1
+                self.fetch_button['state'] = tk.NORMAL
+            else:
+                messagebox.showerror("Error", "unable to fetch prayer times, please check your input")
         else:
-            messagebox.showerror("Error", "unable to fetch paryer times, please check your input")
+            messagebox.showerror("Error", "Please enter a country and city names")
 
 
 if __name__ == "__main__":

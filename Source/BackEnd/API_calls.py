@@ -16,4 +16,4 @@ class PrayerTimesAPI():
                 times = info['data']["timings"]
                 return times
         except Exception as e:
-            return f"an unexpected error occurred {e}"
+            return -1
