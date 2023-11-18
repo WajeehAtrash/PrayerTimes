@@ -3,7 +3,7 @@ import BackEnd.API_calls as Call
 from tkinter import ttk, messagebox
 from threading import Lock
 
-
+DONT_SHOW_MESSAGE = 0
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -61,26 +61,15 @@ class App(tk.Tk):
         city = self.city_entry.get()
         country = self.country_entry.get()
         method = self.method_combo.current()
-        index = 0
         if city and country:
             api_call = Call.PrayerTimesAPI(city, country, method)
             times = api_call.fetch()
-            del self.__private_prayer_times_labels[:]
-            if times != -1:
-                for name, time in times.items():
-                    if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
-                            and name != "Lastthird":
-                        self.__private_prayer_times_labels.append(ttk.Label(self.body, text=f"{name} : {time}"))
-                        self.__private_prayer_times_labels[index].grid(row=self.__private_times_row + index, column=0,
-                                                                       columnspan=2)
-                        index = index + 1
-                self.fetch_button['state'] = tk.NORMAL
-            else:
-                messagebox.showerror("Error", "unable to fetch prayer times, please check your input")
+            self.__show_times(times, DONT_SHOW_MESSAGE)
         else:
             messagebox.showerror("Error", "Please enter a country and city names")
 
     def __fetch_times(self):
+        self.fetch_button['state'] = tk.DISABLED
         with self.__request_lock:
             city = self.city_entry.get()
             country = self.country_entry.get()
@@ -98,22 +87,25 @@ class App(tk.Tk):
             # check the thread every 100ms
             self.after(100, lambda: self.monitor(thread))
         else:
-            index = 0
-            del self.__private_prayer_times_labels[:]
             times = thread.get_times()
-            if times is not None:
-                for name, time in times.items():
-                    if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
-                            and name != "Lastthird":
-                        self.__private_prayer_times_labels.append(ttk.Label(self.body, text=f"{name} : {time}"))
-                        self.__private_prayer_times_labels[index].grid(row=self.__private_times_row + index, column=0,
-                                                                       columnspan=2)
-                        index = index + 1
-                self.fetch_button['state'] = tk.NORMAL
-                messagebox.showinfo("Success", "Times fetched successfully")
-            else:
-                messagebox.showerror("Error", "unable to fetch prayer times, please check your input")
+            self.__show_times(times)
             self.fetch_button['state'] = tk.NORMAL
+
+    def __show_times(self, times, show_message=1):
+        index = 0
+        del self.__private_prayer_times_labels[:]
+        if times is not None:
+            for name, time in times.items():
+                if name != "Sunset" and name != "Imsak" and name != "Midnight" and name != "Firstthird" \
+                        and name != "Lastthird":
+                    self.__private_prayer_times_labels.append(ttk.Label(self.body, text=f"{name} : {time}"))
+                    self.__private_prayer_times_labels[index].grid(row=self.__private_times_row + index, column=0,
+                                                                   columnspan=2)
+                    index = index + 1
+            if show_message:
+                messagebox.showinfo("Success", "Times fetched successfully")
+        else:
+            messagebox.showerror("Error", "unable to fetch prayer times, please check your input")
 
 
 if __name__ == "__main__":

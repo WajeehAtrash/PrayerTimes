@@ -11,15 +11,7 @@ class PrayerTimesAPI(Thread):
         self.__times = None
 
     def run(self):
-        url = f" http://api.aladhan.com/v1/timingsByCity?city={self.city}&country={self.country}&method={self.method}"
-
-        try:
-            response = requests.get(url)
-            info = response.json()
-            if "data" in info:
-                self.__times = info['data']["timings"]
-        except Exception as e:
-            return -1
+        return self.fetch()
 
     def fetch(self):
         url = f" http://api.aladhan.com/v1/timingsByCity?city={self.city}&country={self.country}&method={self.method}"
@@ -31,7 +23,8 @@ class PrayerTimesAPI(Thread):
                 self.__times = info['data']["timings"]
                 return self.__times
         except Exception as e:
-            return -1
+            print(e)
+            return None
 
     def get_times(self):
         return self.__times
